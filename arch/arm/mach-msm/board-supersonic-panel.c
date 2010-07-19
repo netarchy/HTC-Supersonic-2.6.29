@@ -39,7 +39,7 @@
 ** Innitial T2 Settings
 ** 370 Should net 55fps on Novatek Panels
 */
-int savedT2 = 370;
+int savedT2 = 375; // 375 is the updated default value for Nova panels on DMA_S to fix FPS
 
 #if 1
 #define B(s...) printk(s)
@@ -220,7 +220,7 @@ struct s1d_regs {
 	
 	{0x001C, 0x1500},
 	{0x0020, 0x3047}, //original value 3047
-	{0x0024, 0x401A}, // original value 401A, last 5 bits set PLL clock div, 1A=27 div - netarchy 16
+	{0x0024, 0x4014}, // original value 401A, last 5 bits set PLL clock div, 1A=27 div, 14 = ~53 fps, and is the sweet spot for a pure register epson fix - netarchy
 	{0x0028, 0x031A}, // Pixel Clock select, where we get our base clock from, default 031A, sets clock origin from PLL - netarchy
 	{0x002C, 0x0001},
 	{REG_WAIT, 0x0004}, /* increase delay 1ms -> 4ms */
@@ -230,7 +230,7 @@ struct s1d_regs {
 	{0x002C, 0x0002},
 	{REG_WAIT, 0x0004}, /* increase delay 1ms -> 4ms */
 	{0x002C, 0x0003},
-	{0x0100, 0x3702}, // last 5 bits change pixel clock divider, 00010 (3) sets divider to 4, we like 4 combined with modded PLL clock div - netarchy
+	{0x0100, 0x3703}, // last 5 bits change pixel clock divider, 00011 (3) sets divider to 4, we like 4 combined with modded PLL clock div - netarchy
 	{0x0104, 0x0180}, // 180, LCD configuration register, bad things happen if you change this - netarchy
 	{0x0140, 0x003F},
 	{0x0144, 0x00EF},
@@ -254,7 +254,7 @@ struct s1d_regs {
 	{0x028C, 0x0001},
 	{0x0294, 0x0000},
 	{0x0400, 0x8000},
-	{0x0404, 0x100F}, // original value 1001, Bits 0-9 set the Tearing Effect delay (read: it gets rid of fucking TEARING)
+	{0x0404, 0x100F}, // original value 1001, Bits 0-9 set the Tearing Effect delay (read: it gets rid of fucking TEARING) F
 	{0x0480, 0x0001}, // last digit changes video clock divider, default 1 for a 2x divider - netarchy
 	{0x0500, 0x0000},
 	{0x0504, 0x0011}, // original value 11
@@ -709,7 +709,9 @@ supersonic_panel_unblank(struct msm_mddi_bridge_platform_data *bridge_data,
 		qspi_send_9bit(0x0, 0x29);
 		client_data->remote_write(client_data, 0x7000, 0x0324);
 		client_data->remote_write(client_data, 0x4000, 0x0600);
-		client_data->remote_write(client_data, 0x100F, 0x0404); // Set anti-tearing on unblank (including the intitial unblank at boot time)
+		client_data->remote_write(client_data, 0x100F, 0x0404); // Set anti-tearing on unblank for epson fix (including the intitial unblank at boot time) - netarchy
+		client_data->remote_write(client_data, 0x3703, 0x0100); // Set Pixel Clock Divider to 4 on unblank
+		client_data->remote_write(client_data, 0x4014, 0x0024); // Set PLL clock divider to 15 on unblank
 	}
 
 	backlight_control(1);
@@ -927,8 +929,7 @@ static struct platform_driver suc_backlight_driver = {
 };
 
 static struct msm_mdp_platform_data mdp_pdata = {
-	.dma_channel = MDP_DMA_P, 		// Throw video data down the P channel for both Epson and Nova as it should work with Assassin's fix. 
-	// This breaks HDMI output as a tradeoff.
+	.dma_channel = MDP_DMA_S, 	// Return to DMA_S as we now have pure register approaches for both panels to fix fps, so we can keep hdmi-out working - netarchy
 };
 
 int __init supersonic_init_panel(void)
@@ -948,10 +949,10 @@ int __init supersonic_init_panel(void)
 	if (IS_ERR(vreg_lcd_2v8))
 		return PTR_ERR(vreg_lcd_2v8);
 // start commenting here for old epson fps fix - netarchy
-//	if (panel_type == PANEL_SHARP)
-//		mdp_pdata.ignore_pixel_data_attr = 1;
-//	else
-//		mdp_pdata.ignore_pixel_data_attr = 0;
+	if (panel_type == PANEL_SHARP)
+		mdp_pdata.ignore_pixel_data_attr = 1;
+	else
+		mdp_pdata.ignore_pixel_data_attr = 0;
 // stop commenting here - netarchy
 
 	msm_device_mdp.dev.platform_data = &mdp_pdata;
