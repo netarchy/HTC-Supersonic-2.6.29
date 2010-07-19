@@ -37,9 +37,10 @@
 
 /* 
 ** Innitial T2 Settings
-** 370 Should net 55fps on Novatek Panels
+** Novatek Panels are picky, most start 50fps @ 372, the minority starts @ 378
+** So defaulting at 380, should support all. keyword: *should*
 */
-int savedT2 = 375; // 375 is the updated default value for Nova panels on DMA_S to fix FPS
+int savedT2 = 380; // 380 default, should support around 53+fps for all Novatek Panels
 
 #if 1
 #define B(s...) printk(s)
@@ -200,10 +201,6 @@ struct nov_regs {
 	{0x6A18, 0xff},
 	{0x6A17, 0x01},
 	{0xF402, 0x14},
-
-	/* Remove T2 from init to unsticky */
-	//{0xb101, 0x01}, // AssassinLament's nova panel
-	//{0xb102, 0x72}, // T2 values for his FPS fix
 
 	{0x3500, 0x00},
 	{0x1100, 0x0},
@@ -680,7 +677,7 @@ supersonic_panel_blank(struct msm_mddi_bridge_platform_data *bridge_data,
 		/* readT2 value safety check */
 		if (readT2 < 245 || readT2 > 999)
 		{
-			readT2 = 370;
+			readT2 = 380;
 		}
 		savedT2 = readT2;
 	}
@@ -724,7 +721,7 @@ supersonic_panel_unblank(struct msm_mddi_bridge_platform_data *bridge_data,
 		*/
 		if (savedT2 < 245 || savedT2 > 999)
 		{
-			savedT2 = 370;
+			savedT2 = 380;
 		}
 		/* Write savedT2 to T2 */
 		client_data->remote_write(client_data, (0xff00 & savedT2) >> 8, 0xb101);
