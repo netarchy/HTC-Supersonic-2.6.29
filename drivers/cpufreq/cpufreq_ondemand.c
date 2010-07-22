@@ -30,9 +30,9 @@
  */
 
 #define DEF_FREQUENCY_DOWN_DIFFERENTIAL		(10)
-#define DEF_FREQUENCY_UP_THRESHOLD		(70) // set default threshold to 70 to give the evo better response in scaling - netarchy
+#define DEF_FREQUENCY_UP_THRESHOLD		(80) 
 #define MICRO_FREQUENCY_DOWN_DIFFERENTIAL	(3)
-#define MICRO_FREQUENCY_UP_THRESHOLD		(95)
+#define MICRO_FREQUENCY_UP_THRESHOLD		(70) // set default threshold to 70 to give the evo better response in scaling - netarchy
 #define MIN_FREQUENCY_UP_THRESHOLD		(11)
 #define MAX_FREQUENCY_UP_THRESHOLD		(100)
 
