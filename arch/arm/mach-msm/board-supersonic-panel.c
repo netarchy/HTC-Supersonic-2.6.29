@@ -202,6 +202,9 @@ struct nov_regs {
 	{0x6A17, 0x01},
 	{0xF402, 0x14},
 
+	{0xb101, 0x01}, // T2 init - Put back in, just in case if T2 is defaulted,
+	{0xb102, 0x7c}, // it gets defaulted to 380, and not 340. For Novatek Panels.
+	
 	{0x3500, 0x00},
 	{0x1100, 0x0},
 	{REG_WAIT, 120},
