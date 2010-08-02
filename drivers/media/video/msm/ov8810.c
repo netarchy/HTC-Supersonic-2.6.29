@@ -2365,7 +2365,7 @@ static ssize_t sensor_set_cam_mode(struct device *dev,
 	return count;
 }
 
-static DEVICE_ATTR(sensor, 0444, sensor_vendor_show, NULL);
+static DEVICE_ATTR(node, 0444, sensor_vendor_show, NULL);
 static DEVICE_ATTR(cam_mode, 0644, sensor_read_cam_mode, sensor_set_cam_mode);
 
 static struct kobject *android_ov8810;
@@ -2381,7 +2381,7 @@ static int ov8810_sysfs_init(void)
 		return ret ;
 	}
 	pr_info("Ov8810:sysfs_create_file\n");
-	ret = sysfs_create_file(android_ov8810, &dev_attr_sensor.attr);
+	ret = sysfs_create_file(android_ov8810, &dev_attr_node.attr);
 	if (ret) {
 		pr_info("ov8810_sysfs_init: sysfs_create_file failed\n");
 		ret = -EFAULT;
@@ -2546,7 +2546,7 @@ int ov8810_sensor_config(void __user *argp)
 			break;
 
 		default:
-			rc = -EFAULT;
+			printk(KERN_ERR "unhandled cfgtype: %d\n", cdata.cfgtype); 
 			break;
 		}
 

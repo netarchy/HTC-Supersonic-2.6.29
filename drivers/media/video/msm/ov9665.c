@@ -832,7 +832,7 @@ int ov9665_sensor_config(void __user *argp)
 		rc = ov9665_set_contrast(cfg_data.cfg.contrast_value);
 		break;
 	default:
-		rc = -EINVAL;
+		printk(KERN_ERR "unhandled cfgtype: %d\n", cfg_data.cfgtype);
 		break;
 	}
 
@@ -904,7 +904,7 @@ static ssize_t htcwc_set(struct device *dev,
 	return count;
 }
 
-static DEVICE_ATTR(sensor, 0444, sensor_vendor_show, NULL);
+static DEVICE_ATTR(node, 0444, sensor_vendor_show, NULL);
 static DEVICE_ATTR(htcwc, 0777, htcwc_get, htcwc_set);
 
 static struct kobject *android_ov9665;
@@ -921,7 +921,7 @@ static int ov9665_sysfs_init(void)
 		return ret ;
 	}
 	pr_info("ov9665:sysfs_create_file\n");
-	ret = sysfs_create_file(android_ov9665, &dev_attr_sensor.attr);
+	ret = sysfs_create_file(android_ov9665, &dev_attr_node.attr);
 	if (ret) {
 		pr_info("ov9665_sysfs_init: sysfs_create_file " \
 		"failed\n");
