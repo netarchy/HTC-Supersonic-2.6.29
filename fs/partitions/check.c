@@ -304,10 +304,22 @@ static void part_release(struct device *dev)
 	kfree(p);
 }
 
+/* report partitions in a way that doesn't confuse android when using multiple partitions on the sdcard, courtesy of Ninpo */
+static int part_uevent(struct device *dev, struct kobj_uvent_env *env)
+{
+    struct gendisk *disk = dev_to_disk(dev);
+    struct hd_struct *part = dev_to_part(dev);
+
+    add_uevent_var(env, "PARTN=%u", part->partno);
+    return 0;
+}
+/* end partition reporting code */
+
 struct device_type part_type = {
 	.name		= "partition",
 	.groups		= part_attr_groups,
 	.release	= part_release,
+	.uevent     	= part_uevent,  // partition reporting code
 };
 
 static void delete_partition_rcu_cb(struct rcu_head *head)
